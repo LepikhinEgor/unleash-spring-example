@@ -1,0 +1,4 @@
+rootProject.name = 'unleash-spring-demo'
+
+include 'appserver'
+include 'client'
