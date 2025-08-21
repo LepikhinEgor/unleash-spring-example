@@ -12,21 +12,27 @@ public class Main {
 
     static ExecutorService threadPool = Executors.newVirtualThreadPerTaskExecutor();
 
+    static String appServerUrl = System.getenv("APP_SERVER_URL") == null ? "http://localhost:8080": System.getenv("APP_SERVER_URL");
+
     static AppClient appClient = Feign.builder()
             .encoder(new JacksonEncoder())
             .decoder(new StringDecoder())
-            .target(AppClient.class, "http://localhost:8080");
+            .target(AppClient.class, appServerUrl);
 
     public static void main(String[] args) throws InterruptedException {
+        String usersCountEnv = System.getenv("USERS_COUNT");
+        // by default 5 random and 5 fixed users.
+        int randomUsersCount = usersCountEnv == null ? 5 : Math.max(Integer.parseInt(usersCountEnv) - 5, 5);
 
         while (true) {
-            int randomUsersCount = 5;
+
             var users = generateUsers(randomUsersCount);
             users.forEach(Main::checkIfElseBasedFeatureEnabled);
             Thread.sleep(500);
             users.forEach(Main::checkBeansBasedFeatureEnabled);
             Thread.sleep(500);
             users.forEach(Main::checkVariantBasedFeatureEnabled);
+            System.out.println("Features called by " + users.size() + " random users");
         }
 
     }
@@ -49,15 +55,25 @@ public class Main {
     }
 
     private static void checkIfElseBasedFeatureEnabled(User user) {
-        threadPool.submit(() -> appClient.checkIfElseBasedFeatureEnabled(user.usermame(), user.type().name(), user.age()));
+        scheduleTask(() -> appClient.checkIfElseBasedFeatureEnabled(user.usermame(), user.type().name(), user.age()));
     }
 
     private static void checkBeansBasedFeatureEnabled(User user) {
-        threadPool.submit(() -> appClient.checkBeansBasedFeatureEnabled(user.usermame(), user.type().name()));
+        scheduleTask(() -> appClient.checkBeansBasedFeatureEnabled(user.usermame(), user.type().name()));
     }
 
     private static void checkVariantBasedFeatureEnabled(User user) {
-        threadPool.submit(() -> appClient.checkVariantBasedFeatureEnabled(user.usermame(), user.type().name()));
+        scheduleTask(() -> appClient.checkVariantBasedFeatureEnabled(user.usermame(), user.type().name()));
+    }
+
+    private static void scheduleTask(Runnable task) {
+        threadPool.submit(() -> {
+            try {
+                task.run();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        });
     }
 
     private static String generateRandomString(int stringLength) {

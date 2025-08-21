@@ -70,5 +70,18 @@ services:
     build: unleash-synch-agent
     depends_on:
       - web
+  app-server:
+    build: appserver
+    ports:
+      - 8080:8080
+    expose:
+      - 8080
+    environment:
+      - UNLEASH_URL=http://web:4242
+  client:
+    build: client
+    environment:
+      - USERS_COUNT=10
+      - APP_SERVER_URL=http://app-server:8080
 networks:
   monitoring:
