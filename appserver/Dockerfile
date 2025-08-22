@@ -1,5 +1,33 @@
-FROM openjdk:21-jdk
+# ---- Build Stage ----
+FROM gradle:jdk21 as build
 
-COPY build/libs/appserver-0.0.1-SNAPSHOT.jar appserver.jar
+WORKDIR /home/gradle/project
 
-ENTRYPOINT ["java", "-jar", "appserver.jar"]
+# Copy the Gradle wrapper files
+COPY ../gradle /home/gradle/project/gradle
+COPY ../gradlew /home/gradle/project/
+COPY ../build.gradle /home/gradle/project/
+COPY ../settings.gradle /home/gradle/project/
+
+# Copy server source code
+COPY appserver /home/gradle/project/appserver
+
+# Build the application
+RUN ./gradlew :appserver:bootJar
+
+# ---- Runtime Stage ----
+# We use Temurin as it is the default at VHV
+FROM eclipse-temurin:21-jre-jammy
+
+# In order to use a postgres database, we need to set the active profile
+# ENV SPRING_PROFILES_ACTIVE=postgres
+
+# Copy the build from the server subproject to the runtime image
+# The jar already contains the static export from the ui subproject
+COPY --from=build /home/gradle/project/appserver/build/libs/*.jar app.jar
+
+# Expose the port on which the app will run
+EXPOSE 8080
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app.jar"]

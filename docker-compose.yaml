@@ -1,6 +1,6 @@
 
 services:
-  web:
+  unleash:
     image: unleashorg/unleash-server:latest
     ports:
       - "4242:4242"
@@ -69,9 +69,11 @@ services:
   unleash-sync-agent:
     build: unleash-synch-agent
     depends_on:
-      - web
+      - unleash
   app-server:
-    build: appserver
+    build:
+      context: ./
+      dockerfile: appserver/Dockerfile
     ports:
       - 8080:8080
     expose:
@@ -79,7 +81,11 @@ services:
     environment:
       - UNLEASH_URL=http://web:4242
   client:
-    build: client
+    build:
+      context: ./
+      dockerfile: client/Dockerfile
+    depends_on:
+      - app-server
     environment:
       - USERS_COUNT=10
       - APP_SERVER_URL=http://app-server:8080
