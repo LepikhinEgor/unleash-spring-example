@@ -2,6 +2,6 @@ package ru.baldenna;
 
 public record User(
         String usermame,
-        UserType type,
+        Tariff tariff,
         Integer age
 ) {}

@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 @Component
 public class ThreadLocalUnleashContextProvider implements UnleashContextProvider {
 
-    private ThreadLocal<UnleashContext> currentContext = new ThreadLocal<>();
+    private final ThreadLocal<UnleashContext> currentContext = new ThreadLocal<>();
 
     @NotNull
     @Override
     public UnleashContext getContext() {
-        return currentContext != null && currentContext.get() != null ? currentContext.get() : UnleashContext.builder().build();
+        return currentContext.get() != null ? currentContext.get() : UnleashContext.builder().build();
     }
 
     public void setContext(UnleashContext unleashContext) {

@@ -12,8 +12,13 @@ COPY ../settings.gradle /home/gradle/project/
 # Copy server source code
 COPY client /home/gradle/project/client
 
+# Add permisstions for gradle
+COPY --chown=gradle:gradle . /home/gradle/project
+USER root
+RUN chown -R gradle /home/gradle/project
+
 # Build the application
-RUN ./gradlew :client:jar
+RUN gradle :client:jar
 
 # ---- Runtime Stage ----
 # We use Temurin as it is the default at VHV

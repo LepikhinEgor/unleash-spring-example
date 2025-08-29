@@ -33,16 +33,13 @@ public class FeatureController {
     @Qualifier(SECOND_VARIANT_SERVICE_BEAN)
     VariantTestService variantTestService;
 
-    @Autowired
-    UnleashContextProvider unleashContextProvider;
-
     @GetMapping("feature/ifelse-feature/status")
     public void checkIfElseFeatureEnabledForClient(@RequestParam String user,
-                                                   @RequestParam String customerType,
+                                                   @RequestParam String tariff,
                                                    @RequestParam Integer age) {
         UnleashContext context = UnleashContext.builder()
                 .userId(user)
-                .addProperty("customer_type", customerType)
+                .addProperty("tariff", tariff)
                 .addProperty("age", age.toString())
                 .build();
 

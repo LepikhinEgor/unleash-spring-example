@@ -12,27 +12,28 @@ public class Main {
 
     static ExecutorService threadPool = Executors.newVirtualThreadPerTaskExecutor();
 
-    static String appServerUrl = System.getenv("APP_SERVER_URL") == null ? "http://localhost:8080": System.getenv("APP_SERVER_URL");
+    static String appServerUrl = System.getenv("APP_SERVER_URL");
+    static String appServerDefault = "http://localhost:8080";
 
     static AppClient appClient = Feign.builder()
             .encoder(new JacksonEncoder())
             .decoder(new StringDecoder())
-            .target(AppClient.class, appServerUrl);
+            .target(AppClient.class, appServerUrl == null ? appServerDefault : appServerUrl);
 
     public static void main(String[] args) throws InterruptedException {
         String usersCountEnv = System.getenv("USERS_COUNT");
         // by default 5 random and 5 fixed users.
-        int randomUsersCount = usersCountEnv == null ? 5 : Math.max(Integer.parseInt(usersCountEnv) - 5, 5);
+        int randomUsersCount = usersCountEnv == null ? 5 : Math.max(Integer.parseInt(usersCountEnv) - 10, 10);
 
         while (true) {
-
             var users = generateUsers(randomUsersCount);
+
             users.forEach(Main::checkIfElseBasedFeatureEnabled);
-            Thread.sleep(500);
             users.forEach(Main::checkBeansBasedFeatureEnabled);
-            Thread.sleep(500);
             users.forEach(Main::checkVariantBasedFeatureEnabled);
+
             System.out.println("Features called by " + users.size() + " random users");
+            Thread.sleep(1000);
         }
 
     }
@@ -41,29 +42,36 @@ public class Main {
         var users = new ArrayList<User>();
 
         // fixed usernames for blacklist/whitelist strategies
-        users.add(new User("user1", UserType.FL, generateRandomAge()));
-        users.add(new User("user2", UserType.FL, generateRandomAge()));
-        users.add(new User("user3", UserType.UL, generateRandomAge()));
-        users.add(new User("user4", UserType.UL, generateRandomAge()));
-        users.add(new User("user5", UserType.IP, generateRandomAge()));
+        users.add(new User("user1", Tariff.PRO, generateRandomAge()));
+        users.add(new User("user2", Tariff.PRO, generateRandomAge()));
+        users.add(new User("user3", Tariff.PRO, generateRandomAge()));
+        users.add(new User("user4", Tariff.ULTIMATE, generateRandomAge()));
+        users.add(new User("user5", Tariff.ULTIMATE, generateRandomAge()));
+
+        users.add(new User( generateRandomString(10), Tariff.PRO, generateRandomAge()));
+        users.add(new User( generateRandomString(10), Tariff.PRO, generateRandomAge()));
+        users.add(new User( generateRandomString(10), Tariff.PRO, generateRandomAge()));
+        users.add(new User( generateRandomString(10), Tariff.ULTIMATE, generateRandomAge()));
+        users.add(new User( generateRandomString(10), Tariff.VIP, generateRandomAge()));
 
         for (int i = 0; i < randomUsersCount; i++) {
             String randomString = generateRandomString(10);
-            users.add(new User(randomString, UserType.NOT_CLIENT, generateRandomAge()));
+            users.add(new User(randomString, Tariff.FREE, generateRandomAge()));
         }
+
         return users;
     }
 
     private static void checkIfElseBasedFeatureEnabled(User user) {
-        scheduleTask(() -> appClient.checkIfElseBasedFeatureEnabled(user.usermame(), user.type().name(), user.age()));
+        scheduleTask(() -> appClient.checkIfElseBasedFeatureEnabled(user.usermame(), user.tariff().name(), user.age()));
     }
 
     private static void checkBeansBasedFeatureEnabled(User user) {
-        scheduleTask(() -> appClient.checkBeansBasedFeatureEnabled(user.usermame(), user.type().name()));
+        scheduleTask(() -> appClient.checkBeansBasedFeatureEnabled(user.usermame(), user.tariff().name()));
     }
 
     private static void checkVariantBasedFeatureEnabled(User user) {
-        scheduleTask(() -> appClient.checkVariantBasedFeatureEnabled(user.usermame(), user.type().name()));
+        scheduleTask(() -> appClient.checkVariantBasedFeatureEnabled(user.usermame(), user.tariff().name()));
     }
 
     private static void scheduleTask(Runnable task) {
@@ -86,8 +94,8 @@ public class Main {
         return result.toString();
     }
 
-        private static int generateRandomAge() {
-            return (int) (Math.random() * (100 - 20 + 1)) + 20;
-        }
+    private static int generateRandomAge() {
+        return (int) (Math.random() * 100);
+    }
 
 }

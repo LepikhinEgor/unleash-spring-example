@@ -79,7 +79,7 @@ services:
     expose:
       - 8080
     environment:
-      - UNLEASH_URL=http://web:4242
+      - UNLEASH_URL=http://unleash:4242
   client:
     build:
       context: ./
@@ -87,7 +87,7 @@ services:
     depends_on:
       - app-server
     environment:
-      - USERS_COUNT=10
+      - USERS_COUNT=20
       - APP_SERVER_URL=http://app-server:8080
 networks:
   monitoring:

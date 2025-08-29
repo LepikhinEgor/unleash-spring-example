@@ -28,11 +28,11 @@ public class UnleashContextAspect {
     @Around("restControllersPointcut()")
     public Object aroundProcess(ProceedingJoinPoint jp) throws Throwable {
         String user = httpServletRequest.getParameter("user");
-        String customerType = httpServletRequest.getParameter("customerType");
+        String tariff = httpServletRequest.getParameter("tariff");
 
         unleashContextProvider.setContext(UnleashContext.builder()
                 .userId(user)
-                .addProperty("customer_type", customerType)
+                .addProperty("tariff", tariff)
                 .build()
         );
 

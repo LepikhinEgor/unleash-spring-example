@@ -1,60 +1,94 @@
-tags:
-  - value: test3
-    type: simple
-  - value: test5
-    type: simple
-  - value: test7
-    type: simple
-  - value: newTag
-    type: simple
-  - value: obip
-    type: simple
-  - value: test1
-    type: simple
-  - value: beta
-    type: simple
+contextFields:
+  - name: tariff
+    description: Customer tariff
+    stickiness: false
+    sortOrder: 1
+    legalValues:
+      - { value: FREE, description: Free plan }
+      - { value: PRO, description: Pro plan }
+      - { value: ULTIMATE, description: Ultimate plan }
+      - { value: VIP, description: Vip client }
+  - name: age
+    description: Customer age
+    stickiness: false
+    sortOrder: 2
 projects:
   default:
     features:
       - name: ifelse-feature
         type: release
         description: This is feature for test feature creation
-        tags:
-          - value: beta
-            type: simple
       - name: beans-feature
         type: release
         description: This is feature 2
-        tags:
-          - value: obip
-            type: simple
       - name: variants-feature
         type: release
         description: Variants based feature
-      - name: feature32
-        type: release
-        description: This is feature 3
-        tags:
-          - value: test3
-            type: simple
-      - name: feature4
-        type: release
-        description: This is feature ff
-        tags:
-          - value: test1
-            type: simple
-      - name: feature5
-        type: release
-        description: This is feature ffff33
-        tags:
-          - value: test1
-            type: simple
-      - name: feature6
-        type: experiment
-        description: This is feature ffffffff
-      - name: feature78
-        type: experiment
-        description: This is feature semm
-        tags:
-          - value: newTag
-            type: simple
+    environments:
+      - name: development
+        featureStrategies:
+          variants-feature:
+            - name: flexibleRollout
+              constraints: [ ]
+              parameters:
+                rollout: "100"
+                stickiness: "default"
+                groupId: "variants-feature"
+              variants:
+                - name: "firstVariant"
+                  stickiness: "default"
+                  weight: 200
+                  payload:
+                    type: "string"
+                    value: "testFirst"
+                  weightType: "fix"
+                - name: "secondVariant"
+                  stickiness: "default"
+                  weight: 500
+                  payload:
+                    type: "string"
+                    value: "testSecond"
+                  weightType: "fix"
+                - name: "thirdVariant"
+                  stickiness: "default"
+                  weight: 300
+                  payload:
+                    type: "string"
+                    value: "testThird"
+                  weightType: "variable"
+              segments: []
+              disabled: false
+          ifelse-feature:
+            - name: flexibleRollout
+              title: null
+              constraints:
+                - contextName: age
+                  value: 40
+                  inverted: false
+                  operator: NUM_GTE
+                  caseInsensitive: false
+              parameters:
+                rollout: "100"
+                stickiness: "default"
+                groupId: "feature78"
+              variants: []
+              segments: []
+              disabled: false
+          beans-feature:
+            - name: flexibleRollout
+              title: null
+              constraints:
+                - contextName: tariff
+                  values:
+                    - ULTIMATE
+                    - VIP
+                  inverted: false
+                  operator: IN
+                  caseInsensitive: false
+              parameters:
+                rollout: "100"
+                stickiness: "default"
+                groupId: "beans-feature"
+              variants: []
+              segments: []
+              disabled: false
