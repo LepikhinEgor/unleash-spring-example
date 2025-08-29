@@ -37,4 +37,6 @@ out/
 .vscode/
 
 prometheus
-grafana
+grafana/*
+monitoring/grafana/sessions
+monitoring/grafana/grafana.db
