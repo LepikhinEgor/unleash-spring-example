@@ -1,1 +1,0 @@
-java -jar unleash-agent.jar -f UnleashConfig.yaml -u http://localhost:4242 -l admin  -p unleash4all

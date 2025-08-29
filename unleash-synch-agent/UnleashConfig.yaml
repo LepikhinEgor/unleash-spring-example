@@ -12,6 +12,20 @@ contextFields:
     description: Customer age
     stickiness: false
     sortOrder: 2
+segments:
+  - name: "beta-testers"
+    description: "Beta testers which test unreleased features"
+    constraints:
+      - contextName: "userId"
+        operator: "IN"
+        caseInsensitive: true
+        inverted: false
+        values:
+          - "user1"
+          - "user2"
+          - "user3"
+          - "user4"
+          - "user5"
 projects:
   default:
     features:
