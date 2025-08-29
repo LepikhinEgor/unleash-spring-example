@@ -1,4 +1,4 @@
-Text translated by AI. See original [README_RU](README_RU.md)
+Text was translated by AI. See original [README_RU](README_RU.md)
 # Unleash demo
 
 This is a project to demonstrate the capabilities of Unleash for a service using Java + Spring.
